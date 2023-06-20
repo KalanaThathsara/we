@@ -2,19 +2,34 @@ import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
 
+const api = {
+  key:'6150031b4e9906582f3b4a3ab25a0d8e',
+  base:'http://api.openweathermap.org/data/2.5/',
+}
+
 function App() {
 
-  const api ={
-    key : '6150031b4e9906582f3b4a3ab25a0d8e',
-    base:'http://api.openweathermap.org/data/2.5/',
-  }
-
   const[search, setSearch] = useState('');
+  const[weather, setWeather]= useState('')
+  const [error, setError] = useState(false)
   const searchchClick = () => {
     fetch(`${api.base}weather?q=${search}&units=metric&APPID=${api.key}`)
-    .then((res) => res.json())
+    .then((res) => {
+      if (res.ok){
+        return res.json();
+      }else {
+        throw new Error('City Not Found')
+      }
+    })
     .then((result)=> {
+      setWeather(result)
       console.log(result)
+      console.log(result.name)
+    })
+    .catch((error) => {
+      console.log(error);
+      setWeather(null);
+      setError(true);
     })
   }
   return (
@@ -30,17 +45,23 @@ function App() {
         onChange={(e) => setSearch(e.target.value)}></input>
         <button onClick={searchchClick}>Search</button>
         </div>
+
+        {error && !weather && <p>City Not Found</p>}
         
-        
-        {/* Location  */}
-        <p>Colombo</p>
+        {weather && (<div>
+          {/* Location  */}
+        <p>{weather.name}</p>
 
 
         {/* Temparature Celcius */}
-        <p>30 c</p>
+        <p>{weather.main.temp} °C</p> 
+
 
         {/* Weather Condition - sunny, ... */}
-        <p>Raining</p>
+        <p>{weather.weather[0].main}</p>
+        </div>)}
+        
+        
       </header>
     </div>
   );
